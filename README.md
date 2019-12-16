@@ -1,22 +1,14 @@
-Hello Triangle Vulkan demo
+Hello Triangle Vulkan DXGI interop demo
 =========================
 
-This is a traditional Hello World style application for graphical Vulkan.
-It renders a RGB shaded equilateral triangle (well, if the resolution is a
+This is a Hello World style application for graphical Vulkan showing qck and
+dyrty interop with DXGI. This demo uses DXGI swapchain and imports its Images
+into Vulkan.
+Then it renders a RGB shaded equilateral triangle (well, if the resolution is a
 square).
 
-The code is quite flat and basic, so I think it's good enough for learning. No
-tutorial or even much comments are provided though (comments do lie anyway
-:smirk:).
-
-But I have tried not to cut corners making it. It contains proper error handling
-and I assume it is without errors :innocent:. It should perfectly adhere to the
-Vulkan specification &mdash; e.g. it should do proper synchronization and do so
-in reasonably efficient way (as it was meant to be used). Well, at least that is
-the goal (i.e to have at least for this elementary case a flawless enough
-application).
-
-If you appriciate any of my free work or help (e.g. hosting this), you can send me some sweet sweet money:
+If you appriciate any of my free work or help (e.g. hosting this), you can send
+me some sweet sweet money:
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=6NRLHTNEP8GH8&item_name=For+Petr+Kraus+%28aka+krOoze%29+if+you+appreciate+any+of+my+work+done+for+free.&currency_code=USD&source=url">
 <img width="145" height="30" src="http://vulkan.hys.cz/donate.png" alt="Donate $ to krOoze" /></a>
@@ -37,13 +29,7 @@ changes.
 | [MSAA](https://github.com/krOoze/Hello_Triangle/tree/MSAA)  | [diff](https://github.com/krOoze/Hello_Triangle/compare/MSAA) | Antialiasing (i.e. Vulkan's multisample image resolve) |
 | [queue_transfer](https://github.com/krOoze/Hello_Triangle/tree/queue_transfer) | [diff](https://github.com/krOoze/Hello_Triangle/compare/queue_transfer) | Transfer of `EXCLUSIVE` image between queue families (separate graphics and compute queue family) |
 | [vertex_offset](https://github.com/krOoze/Hello_Triangle/tree/vertex_offset) | [diff](https://github.com/krOoze/Hello_Triangle/compare/vertex_offset) | Demonstrates how offset in `vkCmdBindVertexBuffers()` works |
-
-Proper renderloop synchronization mini-tutorial
--------------------------------------
-
-Well, people tend to ask this one over and over, so I will make an exception to
-the "no tutorial" policy above :wink::
-[doc/synchronizationTutorial.md](doc/synchronizationTutorial.md).
+| [dxgi_interop](https://github.com/krOoze/Hello_Triangle/tree/dxgi_interop) | [diff](https://github.com/krOoze/Hello_Triangle/compare/dxgi_interop) | Shows how to import swapchain images from DXGI (Direct3D 12 Swapchain) |
 
 Requirements
 ----------------------------
@@ -52,18 +38,8 @@ Requirements
 **Language**: C++14  
 **Build environment**: (latest) LunarG SDK (requires `VULKAN_SDK` variable, and `glslc` binary built)  
 **Build environment[Windows]**: Visual Studio, Cygwin, or MinGW (or IDEs running on top of them)  
-**Build environment[Linux]**: g++ or clang (and compatible IDEs) and libxcb-dev and libxcb-keysyms-dev  
-**Build Environment[GLFW]**: GLFW 3.2+ (already included as a git submodule), requires `xorg-dev` package on Linux  
-**Build environment[Xlib]**: Requires `xorg-dev` package  
-**Build environment[XCB]**: Requires `libxcb1-dev`, `libxcb-util-dev`, `libxcb-keysyms1-dev`, and `x11proto-dev` packages  
-**Build environment[Wayland]**: Requires `libwayland-dev` and `libxkbcommon-dev` packages  
 **Target Environment**: installed (latest) Vulkan capable drivers (to see anything)  
-**Target Environment**: GLFW(recommended), XCB, Xlib, or Wayland based windowing system
-
-On Unix-like environment refer to [SDK docs](https://vulkan.lunarg.com/doc/sdk/latest/linux/getting_started.html) on how to set `VULKAN_SDK` variable.
-
-Adding `VkSurface` support for other platforms should be straightforward using
-the provided ones as a template for it.
+**Target Environment**: Windows 10 (DirectX 12)
 
 Files
 ----------------------------------
@@ -81,11 +57,7 @@ Files
 | src/Vertex.h | Just simple Vertex definitions |
 | src/VulkanEnvironment.h | Includes `vulkan.h` and the necessary platform headers |
 | src/VulkanReflection.h | Reflection of Vulkan; e.g. convert VK enumerants to strings |
-| src/Wsi.h | Meta-header choosing one of the platforms in WSI directory |
-| src/WSI/Glfw.h | WSI platform-dependent stuff via GLFW3 library |
-| src/WSI/Win32.h | WSI Win32 platform-dependent stuff |
-| src/WSI/Xcb.h | WSI XCB platform-dependent stuff |
-| src/WSI/Xlib.h | WSI XLIB platform-dependent stuff |
+| src/WSI/DxgiWsi.h | DXGI implementation as a Vulkan swapchain |
 | src/shaders/hello_triangle.vert | The vertex shader program in GLSL |
 | src/shaders/hello_triangle.frag | The fragment shader program in GLSL |
 | .gitignore | Git filter file ignoring most probably outputs messing the local repo |
@@ -135,8 +107,7 @@ or even just
 Then use `make`, or the generated Visual Studio `*.sln`, or whatever it created.
 
 There are two cmake options (supplied by `-D`):
- - `WSI` -- set this to `USE_PLATFORM_GLFW` or any `VK_USE_PLATFORM_*_KHR` to
-    select the WSI to be used. Default is GLFW.
+ - `WSI` -- ignored. DXGI is used.
  - `TODO` -- set this to `OFF` to remove TODO messages during compilation.
 
  You also might want to add `-DCMAKE_BUILD_TYPE=Debug`.
